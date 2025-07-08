@@ -1,0 +1,19 @@
+# Ignore build artifacts
+elm-stuff/
+*.js
+*.js.map
+
+# Ignore backup files
+*.backup
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore Docker files
+Dockerfile
+.dockerignore
+
+# Ignore git files
+.git/
+.gitignore

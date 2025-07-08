@@ -1,0 +1,189 @@
+services:
+  # OpenAPI service that serves comprehensive OpenAPI specifications
+  openapi-service:
+    build:
+      context: .
+      dockerfile: docker/openapi-service/Dockerfile
+    container_name: elm-codegen-openapi-service
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ASPNETCORE_ENVIRONMENT=Development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - elm-codegen-network
+
+  # Code generation service
+  codegen:
+    build:
+      context: ../
+      dockerfile: integration-tests/docker/codegen/Dockerfile
+    container_name: elm-codegen-generator
+    depends_on:
+      openapi-service:
+        condition: service_healthy
+    environment:
+      - OPENAPI_SERVICE_URL=http://openapi-service:5000
+      - OUTPUT_DIR=/generated-code
+      - MODULE_PREFIX=Api
+      - SPEC_FORMAT=yaml
+    volumes:
+      - generated-code:/generated-code
+    networks:
+      - elm-codegen-network
+
+  # Test with JSON format too (file-based)
+  codegen-json:
+    build:
+      context: ../
+      dockerfile: integration-tests/docker/codegen/Dockerfile
+    container_name: elm-codegen-generator-json
+    depends_on:
+      openapi-service:
+        condition: service_healthy
+      codegen:
+        condition: service_completed_successfully
+    environment:
+      - OPENAPI_SERVICE_URL=http://openapi-service:5000
+      - OUTPUT_DIR=/generated-code-json
+      - MODULE_PREFIX=Api
+      - SPEC_FORMAT=json
+    volumes:
+      - generated-code-json:/generated-code-json
+    networks:
+      - elm-codegen-network
+
+  # Test URL input directly with YAML (NEW FEATURE)
+  codegen-url-yaml:
+    build:
+      context: ../
+      dockerfile: integration-tests/docker/codegen/Dockerfile
+    container_name: elm-codegen-generator-url-yaml
+    depends_on:
+      openapi-service:
+        condition: service_healthy
+      codegen-json:
+        condition: service_completed_successfully
+    environment:
+      - OPENAPI_SERVICE_URL=http://openapi-service:5000
+      - OUTPUT_DIR=/generated-code-url-yaml
+      - MODULE_PREFIX=Api
+      - INPUT_MODE=url
+      - SPEC_FORMAT=yaml
+    volumes:
+      - generated-code-url-yaml:/generated-code-url-yaml
+    networks:
+      - elm-codegen-network
+
+  # Test URL input directly with JSON (NEW FEATURE)
+  codegen-url-json:
+    build:
+      context: ../
+      dockerfile: integration-tests/docker/codegen/Dockerfile
+    container_name: elm-codegen-generator-url-json
+    depends_on:
+      openapi-service:
+        condition: service_healthy
+      codegen-url-yaml:
+        condition: service_completed_successfully
+    environment:
+      - OPENAPI_SERVICE_URL=http://openapi-service:5000
+      - OUTPUT_DIR=/generated-code-url-json
+      - MODULE_PREFIX=Api
+      - INPUT_MODE=url
+      - SPEC_FORMAT=json
+    volumes:
+      - generated-code-url-json:/generated-code-url-json
+    networks:
+      - elm-codegen-network
+
+  # Elm build validation
+  elm-build:
+    build:
+      context: .
+      dockerfile: docker/elm-build/Dockerfile
+    container_name: elm-codegen-elm-build
+    depends_on:
+      codegen:
+        condition: service_completed_successfully
+    environment:
+      - GENERATED_CODE_DIR=/generated-code
+    volumes:
+      - generated-code:/generated-code:ro
+    networks:
+      - elm-codegen-network
+
+  # Elm build validation for JSON-generated code
+  elm-build-json:
+    build:
+      context: .
+      dockerfile: docker/elm-build/Dockerfile
+    container_name: elm-codegen-elm-build-json
+    depends_on:
+      codegen-json:
+        condition: service_completed_successfully
+    environment:
+      - GENERATED_CODE_DIR=/generated-code-json
+    volumes:
+      - generated-code-json:/generated-code-json:ro
+    networks:
+      - elm-codegen-network
+
+  # Test orchestrator that coordinates and validates the workflow
+  test-orchestrator:
+    build:
+      context: .
+      dockerfile: docker/test-orchestrator/Dockerfile
+    container_name: elm-codegen-test-orchestrator
+    depends_on:
+      openapi-service:
+        condition: service_healthy
+    environment:
+      - OPENAPI_SERVICE_URL=http://openapi-service:5000
+      - MAX_WAIT_TIME=60
+    networks:
+      - elm-codegen-network
+
+  # Final validation that runs after all other services
+  final-validator:
+    build:
+      context: .
+      dockerfile: docker/test-orchestrator/Dockerfile
+    container_name: elm-codegen-final-validator
+    depends_on:
+      elm-build:
+        condition: service_completed_successfully
+      elm-build-json:
+        condition: service_completed_successfully
+      test-orchestrator:
+        condition: service_completed_successfully
+    environment:
+      - OPENAPI_SERVICE_URL=http://openapi-service:5000
+      - VALIDATION_MODE=final
+    command: ["./final-validator.sh"]
+    volumes:
+      - generated-code:/generated-code:ro
+      - generated-code-json:/generated-code-json:ro
+    networks:
+      - elm-codegen-network
+
+volumes:
+  generated-code:
+    driver: local
+  generated-code-json:
+    driver: local
+  generated-code-url-yaml:
+    driver: local
+  generated-code-url-json:
+    driver: local
+
+networks:
+  elm-codegen-network:
+    driver: bridge
+    name: elm-codegen-integration-test

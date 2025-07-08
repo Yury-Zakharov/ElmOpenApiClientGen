@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <GenerateProgramFile>false</GenerateProgramFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="RequestGeneratorTests.fs" />
+    <Compile Include="RequestGeneratorNegativeTests.fs" />
+    <Compile Include="CodegenTests.fs" />
+    <Compile Include="CodegenNegativeTests.fs" />
+    <Compile Include="TemplateRendererTests.fs" />
+    <Compile Include="TemplateRendererNegativeTests.fs" />
+    <Compile Include="IntegrationTests.fs" />
+    <Compile Include="IntegrationNegativeTests.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ElmOpenApiClientGen\ElmOpenApiClientGen.fsproj" />
+  </ItemGroup>
+
+</Project>

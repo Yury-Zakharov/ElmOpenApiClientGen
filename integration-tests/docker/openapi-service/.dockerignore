@@ -1,0 +1,21 @@
+# Ignore build artifacts and unnecessary files
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Ignore Docker files
+Dockerfile
+.dockerignore
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore test files
+test-output/
+temp/

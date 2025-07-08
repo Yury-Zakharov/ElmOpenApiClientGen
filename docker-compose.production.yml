@@ -1,0 +1,92 @@
+# Docker Compose for ElmOpenApiClientGen Production Usage
+# 
+# This compose file provides convenient ways to use ElmOpenApiClientGen
+# for different scenarios.
+
+version: '3.8'
+
+services:
+  # Basic ElmOpenApiClientGen service
+  elm-openapi-gen:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: elm-openapi-gen:latest
+    volumes:
+      - ./input:/input:ro      # Mount local specs directory (read-only)
+      - ./output:/output       # Mount output directory
+    environment:
+      - MODULE_PREFIX=Api
+    # Override command to show help by default
+    command: ["--help"]
+
+  # Example: Generate from local file
+  generate-from-file:
+    extends: elm-openapi-gen
+    command: 
+      - "--input"
+      - "/input/openapi.yaml"
+      - "--output" 
+      - "/output"
+      - "--moduleprefix"
+      - "MyApi"
+      - "--force"
+    depends_on:
+      - elm-openapi-gen
+
+  # Example: Generate from remote URL (PetStore)
+  generate-petstore:
+    extends: elm-openapi-gen
+    command:
+      - "--input"
+      - "https://petstore.swagger.io/v2/swagger.json"
+      - "--output"
+      - "/output"
+      - "--moduleprefix"
+      - "PetStore"
+      - "--force"
+    depends_on:
+      - elm-openapi-gen
+
+  # Example: Generate from GitHub API
+  generate-github:
+    extends: elm-openapi-gen
+    command:
+      - "--input"
+      - "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json"
+      - "--output"
+      - "/output"
+      - "--moduleprefix"
+      - "GitHub"
+      - "--force"
+    depends_on:
+      - elm-openapi-gen
+
+volumes:
+  input:
+    driver: local
+  output:
+    driver: local
+
+# Usage examples:
+#
+# 1. Build the image:
+#    docker-compose -f docker-compose.production.yml build
+#
+# 2. Show help:
+#    docker-compose -f docker-compose.production.yml run --rm elm-openapi-gen
+#
+# 3. Generate from local file (place your openapi.yaml in ./input/):
+#    docker-compose -f docker-compose.production.yml run --rm generate-from-file
+#
+# 4. Generate from PetStore API:
+#    docker-compose -f docker-compose.production.yml run --rm generate-petstore
+#
+# 5. Generate from GitHub API:
+#    docker-compose -f docker-compose.production.yml run --rm generate-github
+#
+# 6. Custom generation:
+#    docker-compose -f docker-compose.production.yml run --rm elm-openapi-gen \
+#      --input https://api.example.com/openapi.yaml \
+#      --moduleprefix MyCustomApi \
+#      --force

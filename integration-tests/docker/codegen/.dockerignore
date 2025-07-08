@@ -1,0 +1,31 @@
+# Ignore build artifacts
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Ignore test artifacts
+tests/
+integration-tests/
+Generated/
+TestOutput*/
+test-output/
+temp/
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore Docker files in subdirectories
+docker/
+Dockerfile*
+.dockerignore
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore debug files
+debug-openapi.json

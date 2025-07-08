@@ -1,0 +1,109 @@
+openapi: 3.0.3
+info:
+  title: Advanced Schema Test API
+  description: A comprehensive API for testing advanced schema features including recursive types, additional properties, and conditional schemas.
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+
+paths:
+  /test:
+    get:
+      operationId: testAdvanced
+      summary: Test advanced schema features
+      description: Retrieves data showcasing recursive types, additional properties, and conditional schemas.
+      responses:
+        '200':
+          description: Successfully retrieved advanced type data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvancedType'
+        '400':
+          description: Invalid request parameters
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    # Recursive type example
+    TreeNode:
+      type: object
+      description: A tree node that can contain child nodes and reference its parent
+      properties:
+        value:
+          type: string
+          description: The value stored in this node
+        children:
+          type: array
+          description: List of child nodes
+          items:
+            $ref: '#/components/schemas/TreeNode'
+        parent:
+          $ref: '#/components/schemas/TreeNode'
+          description: Reference to parent node
+          nullable: true
+      required: [value]
+
+    # Type with additionalProperties
+    FlexibleObject:
+      type: object
+      properties:
+        name:
+          type: string
+        required_field:
+          type: integer
+      additionalProperties:
+        type: string
+      required: [name, required_field]
+
+    # Pattern properties (via extension)
+    PatternObject:
+      type: object
+      properties:
+        fixedField:
+          type: string
+      patternProperties:
+        "^[a-z]+_[0-9]+$":
+          type: integer
+        "^custom_.*":
+          type: string
+
+    # Conditional schema (if/then/else)
+    ConditionalSchema:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [premium, basic]
+      if:
+        properties:
+          type:
+            const: premium
+      then:
+        properties:
+          premiumFeatures:
+            type: array
+            items:
+              type: string
+        required: [premiumFeatures]
+      else:
+        properties:
+          basicLimit:
+            type: integer
+        required: [basicLimit]
+
+    # Combined advanced type
+    AdvancedType:
+      type: object
+      properties:
+        tree:
+          $ref: '#/components/schemas/TreeNode'
+        flexible:
+          $ref: '#/components/schemas/FlexibleObject'
+        conditional:
+          $ref: '#/components/schemas/ConditionalSchema'
+        pattern_data:
+          $ref: '#/components/schemas/PatternObject'
+      required: [tree, flexible]

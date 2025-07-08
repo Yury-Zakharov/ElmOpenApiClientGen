@@ -1,0 +1,54 @@
+module {{ moduleName }} exposing (..)
+
+{-| {{ apiDescription }}
+
+This module was generated from an OpenAPI specification.
+{{ if generationTimestamp }}Generated on: {{ generationTimestamp }}{{ end }}
+
+# Types
+{{ for typeDoc in typeDocumentation ~}}
+@docs {{ typeDoc }}
+{{ end ~}}
+
+# Functions  
+{{ for funcDoc in functionDocumentation ~}}
+@docs {{ funcDoc }}
+{{ end ~}}
+
+-}
+
+{{ if needsDict }}import Dict exposing (Dict){{ end }}
+{{ if needsHttp }}import Http{{ end }}
+{{ if needsJsonDecode }}import Json.Decode as Decode exposing (Decoder){{ end }}
+{{ if needsAndMap }}import Json.Decode.Extra exposing (andMap){{ end }}
+{{ if needsJsonEncode }}import Json.Encode as Encode exposing (Value){{ end }}
+{{ if needsTask }}import Task exposing (Task){{ end }}
+{{ if needsUrl }}import Url.Builder as Url{{ end }}
+
+-- Types:
+
+{{ for t in types ~}}
+{{ t }}
+
+{{ end ~}}
+
+-- Decoders:
+
+{{ for d in decoders ~}}
+{{ d }}
+
+{{ end ~}}
+
+-- Encoders:
+
+{{ for e in encoders ~}}
+{{ e }}
+
+{{ end ~}}
+
+-- Requests:
+{{ for req in requests ~}}
+{{ req }}
+
+{{ end ~}}
+

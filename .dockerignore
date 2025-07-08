@@ -1,0 +1,76 @@
+# .dockerignore for ElmOpenApiClientGen
+# Exclude unnecessary files from Docker build context
+
+# Build output directories
+bin/
+obj/
+**/bin/
+**/obj/
+**/debug/
+**/release/
+
+# IDE and editor files
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Test output and generated files
+Generated/
+TestOutput/
+TestOutput2/
+test-output/
+**/Generated/
+elm-stuff/
+node_modules/
+
+# Integration test artifacts
+integration-tests/test-output/
+integration-tests/elm-test-app/elm-stuff/
+integration-tests/OpenApiTestService/bin/
+integration-tests/OpenApiTestService/obj/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.cache
+
+# Documentation (not needed for runtime)
+*.md
+CONTRIBUTING.md
+GITHUB_WORKFLOWS.md
+CLAUDE.md
+
+# Sample and test files (not needed for production container)
+sample/
+tests/
+test-*.yaml
+test-*.json
+debug-*.json
+*.fsx
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD files
+.github/
+azure-pipelines.yml
+
+# Package manager files (handled separately)
+*.lock
+packages-lock.json
+
+# Elm-specific
+elm.json.backup
+main.js

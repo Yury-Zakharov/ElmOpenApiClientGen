@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  title: Advanced Type System Test API
+  description: API for testing advanced type system features including phantom types, type-safe URLs, and middleware
+  version: 1.0.0
+servers:
+  - url: https://api.example.com/v1
+security:
+  - bearerAuth: []
+paths:
+  /users/{userId}:
+    get:
+      summary: Get user by ID
+      operationId: getUserById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: includeProfile
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: fields
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: '^[a-zA-Z,]+$'
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          
+  /users/{userId}/validate:
+    post:
+      summary: Validate user data
+      operationId: validateUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserData'
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  schemas:
+    User:
+      type: object
+      x-requires-auth: true
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        email:
+          type: string
+          format: email
+          x-validated: true
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_]+$'
+          x-validated: true
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+      required:
+        - id
+        - email
+        - username
+        
+    UserProfile:
+      type: object
+      x-authenticated: true
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        bio:
+          type: string
+          maxLength: 500
+        website:
+          type: string
+          format: uri
+          x-validated: true
+          
+    UserData:
+      type: object
+      x-requires-auth: true
+      properties:
+        email:
+          type: string
+          format: email
+          x-validated: true
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_]+$'
+          x-validated: true
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+          x-validated: true
+          
+    ValidationResult:
+      type: object
+      properties:
+        isValid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: string
+        warnings:
+          type: array
+          items:
+            type: string

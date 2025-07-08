@@ -1,0 +1,237 @@
+openapi: 3.0.3
+info:
+  title: Testing & Quality Features API
+  description: API for testing comprehensive testing and quality features including property-based tests, mock generators, and validation
+  version: 1.0.0
+servers:
+  - url: https://api.example.com/v1
+security:
+  - bearerAuth: []
+paths:
+  /products:
+    get:
+      summary: List products
+      operationId: listProducts
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 50
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+            minimum: 0.01
+            maximum: 10000.00
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Products list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+                  
+  /products/{productId}:
+    get:
+      summary: Get product
+      operationId: getProduct
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+          
+    put:
+      summary: Update product
+      operationId: updateProduct
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+        - category
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          description: Unique product identifier
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Product name
+        description:
+          type: string
+          maxLength: 1000
+          description: Product description
+        price:
+          type: number
+          minimum: 0.01
+          maximum: 1000000.00
+          description: Product price in USD
+        category:
+          type: string
+          enum: [electronics, clothing, books, home, sports]
+          description: Product category
+        tags:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+          maxItems: 10
+          description: Product tags
+        inStock:
+          type: boolean
+          description: Whether product is in stock
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional product metadata
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          
+    ProductInput:
+      type: object
+      required:
+        - name
+        - price
+        - category
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: '^[a-zA-Z0-9 .-]+$'
+          description: Product name
+        description:
+          type: string
+          maxLength: 1000
+          description: Product description
+        price:
+          type: number
+          minimum: 0.01
+          maximum: 1000000.00
+          description: Product price in USD
+        category:
+          type: string
+          enum: [electronics, clothing, books, home, sports]
+          description: Product category
+        tags:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+            pattern: '^[a-zA-Z0-9-]+$'
+          maxItems: 10
+          description: Product tags
+        inStock:
+          type: boolean
+          default: true
+          description: Whether product is in stock
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional product metadata
+          
+    ValidationError:
+      type: object
+      required:
+        - message
+        - errors
+      properties:
+        message:
+          type: string
+          description: General error message
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - code
+              - message
+            properties:
+              field:
+                type: string
+                description: Field name that caused the error
+              code:
+                type: string
+                enum: [required, invalid_format, out_of_range, too_long, too_short]
+                description: Error code
+              message:
+                type: string
+                description: Human-readable error message
+              value:
+                description: The invalid value that caused the error
+          description: List of validation errors
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
