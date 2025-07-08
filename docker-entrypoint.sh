@@ -94,13 +94,16 @@ if [ $# -eq 0 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     exit 0
 fi
 
-# Parse arguments to check for input
+# Parse arguments to check for input and output
 has_input=false
+has_output=false
 for arg in "$@"; do
     if [ "$prev_arg" = "--input" ] || [ "$prev_arg" = "-i" ]; then
         has_input=true
         input_value="$arg"
-        break
+    elif [ "$prev_arg" = "--output" ] || [ "$prev_arg" = "-o" ]; then
+        has_output=true
+        output_value="$arg"
     fi
     prev_arg="$arg"
 done
@@ -175,6 +178,11 @@ fi
 
 # Run ElmOpenApiClientGen
 print_info "Starting code generation..."
+
+# Add default output parameter if not provided
+if [ "$has_output" = false ]; then
+    set -- "$@" "--output" "$output_dir"
+fi
 
 if dotnet /app/ElmOpenApiClientGen.dll "$@"; then
     print_success "Code generation completed successfully!"

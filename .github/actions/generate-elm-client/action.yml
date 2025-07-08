@@ -1,0 +1,24 @@
+name: 'Elm OpenAPI Client Generator'
+description: 'Generate Elm code (types, encoders, decoders, HTTP requests) from OpenAPI schema'
+author: 'Yury Zakharov'
+branding:
+  icon: code
+  color: blue
+inputs:
+  input:
+    description: 'Path to OpenAPI input file'
+    required: true
+  output:
+    description: 'Directory to place generated Elm files'
+    required: true
+  module:
+    description: 'Elm module name to generate (e.g. Api.Schemas)'
+    required: true
+  force:
+    description: 'Overwrite existing files'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'docker'
+  image: 'docker://ghcr.io/yury-zakharov/elmopenapiclientgen:latest'

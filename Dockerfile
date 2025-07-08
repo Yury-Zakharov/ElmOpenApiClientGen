@@ -9,7 +9,7 @@
 #   docker run --rm -v $(pwd)/specs:/input -v $(pwd)/output:/output elm-openapi-gen --input /input/spec.yaml
 
 # === Build Stage ===
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-preview-alpine AS build
 
 # Install dependencies for downloading and processing OpenAPI specs
 RUN apk add --no-cache \
@@ -20,19 +20,17 @@ RUN apk add --no-cache \
 # Set working directory
 WORKDIR /src
 
-# Copy solution and project files first for better Docker layer caching
-COPY ElmOpenApiClientGen.sln ./
+# Copy project files first for better Docker layer caching
 COPY src/ElmOpenApiClientGen/ElmOpenApiClientGen.fsproj ./src/ElmOpenApiClientGen/
-COPY tests/ElmOpenApiClientGen.Tests/ElmOpenApiClientGen.Tests.fsproj ./tests/ElmOpenApiClientGen.Tests/
 
-# Restore NuGet packages for the main project only
+# Restore NuGet packages
 RUN dotnet restore src/ElmOpenApiClientGen/ElmOpenApiClientGen.fsproj
 
 # Copy source code
 COPY src/ ./src/
 
 # Build the application in Release mode
-RUN dotnet build --configuration Release --no-restore
+RUN dotnet build src/ElmOpenApiClientGen/ElmOpenApiClientGen.fsproj --configuration Release --no-restore
 
 # Publish as self-contained single file for better performance and smaller runtime image
 RUN dotnet publish src/ElmOpenApiClientGen/ElmOpenApiClientGen.fsproj \
@@ -42,7 +40,7 @@ RUN dotnet publish src/ElmOpenApiClientGen/ElmOpenApiClientGen.fsproj \
     --self-contained false
 
 # === Runtime Stage ===
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview-alpine AS runtime
 
 # Install runtime dependencies
 RUN apk add --no-cache \
