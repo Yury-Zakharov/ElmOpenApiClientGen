@@ -10,7 +10,9 @@
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
-        <Content Include="Generator\Templates\module.scriban" />
+        <Content Include="Generator\Templates\module.scriban">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
         
         <Compile Include="Generator\ElmModule.fs" />
         <Compile Include="Generator\TemplateRenderer.fs" />

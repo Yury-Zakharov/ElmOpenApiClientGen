@@ -5,6 +5,13 @@
 [![F# Version](https://img.shields.io/badge/F%23-10.0-blue.svg)](https://fsharp.org/)
 [![Elm Version](https://img.shields.io/badge/Elm-0.19.1-blue.svg)](https://elm-lang.org/)
 
+## 💖 Support This Project
+
+If you find ElmOpenApiClientGen useful, please consider supporting it through [GitHub Sponsors](https://github.com/sponsors/Yury-Zakharov).  
+Your sponsorship helps cover development time, maintenance, and new feature work.
+
+[Become a sponsor](https://github.com/sponsors/Yury-Zakharov)
+
 A robust, production-ready code generator that transforms OpenAPI 3.0/3.1 specifications into type-safe Elm HTTP clients. Built with F# and designed for reliability, this tool handles real-world API specifications gracefully while generating clean, idiomatic Elm code.
 
 ## ✨ Key Features

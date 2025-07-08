@@ -83,6 +83,8 @@ Volumes:
   /input                  Mount directory containing OpenAPI specification files
   /output                 Mount directory for generated Elm code
 
+Support the project: https://github.com/sponsors/Yury-Zakharov
+
 EOF
 }
 

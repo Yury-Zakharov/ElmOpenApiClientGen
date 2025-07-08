@@ -27,8 +27,33 @@ module TemplateRenderer =
         }
 
     let private loadTemplate (path: string) : Template =
-        let content = File.ReadAllText path
-        Template.Parse(content)
+        let resolvedPath = 
+            if File.Exists(path) then 
+                path
+            else
+                // Try to resolve relative to the application's directory
+                let appDir = System.AppDomain.CurrentDomain.BaseDirectory
+                let appRelativePath = Path.Combine(appDir, path)
+                if File.Exists(appRelativePath) then
+                    appRelativePath
+                else
+                    // Try to resolve relative to the current working directory
+                    let workingDir = Directory.GetCurrentDirectory()
+                    let workingRelativePath = Path.Combine(workingDir, path)
+                    if File.Exists(workingRelativePath) then
+                        workingRelativePath
+                    else
+                        // If all else fails, use the original path and let it fail with a clear error
+                        path
+        
+        try
+            let content = File.ReadAllText resolvedPath
+            Template.Parse(content)
+        with
+        | :? FileNotFoundException ->
+            failwith $"Template file not found: {path}. Searched in: {resolvedPath}"
+        | ex ->
+            failwith $"Error loading template from {resolvedPath}: {ex.Message}"
 
     open Scriban.Runtime
 

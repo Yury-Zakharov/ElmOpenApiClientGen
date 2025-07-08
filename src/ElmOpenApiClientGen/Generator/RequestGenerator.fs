@@ -519,11 +519,14 @@ module RequestGenerator =
                         let allCasesWithDefault = 
                             try
                                 let cases = allStatusCodes |> List.map generateStatusCase |> List.filter (fun s -> s <> "") |> String.concat "\n"
-                                cases + "\n                _ -> Err (Http.BadStatus metadata.statusCode)"
+                                if System.String.IsNullOrEmpty(cases) then
+                                    "                _ -> Err (Http.BadStatus metadata.statusCode)"
+                                else
+                                    cases + "\n                _ -> Err (Http.BadStatus metadata.statusCode)"
                             with
                             | _ -> "                _ -> Err (Http.BadStatus metadata.statusCode)"
                         
-                        $"""Http.stringResolver (\\response -> 
+                        $"""Http.stringResolver (\response -> 
             case response of
                 Http.BadUrl_ url -> Err (Http.BadUrl url)
                 Http.Timeout_ -> Err Http.Timeout
@@ -536,7 +539,7 @@ module RequestGenerator =
 {allCasesWithDefault}
             )"""
                     with
-                    | _ -> "Http.stringResolver (\\response -> Ok \"\")"
+                    | _ -> "Http.stringResolver (\response -> Ok \"\")"
                 
                 // Generate simple documentation for the function
                 let funcDoc = 
@@ -601,7 +604,7 @@ module RequestGenerator =
         , headers = []
         , url = ""
         , body = Http.emptyBody
-        , resolver = Http.stringResolver (\\response -> Ok "")
+        , resolver = Http.stringResolver (\response -> Ok "")
         , timeout = Nothing
         }}
 """

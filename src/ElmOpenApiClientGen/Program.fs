@@ -6,7 +6,10 @@ open ElmOpenApiClientGen.Generator
 
 [<EntryPoint>]
 let main argv =
-    let parser = ArgumentParser.Create<Arguments>(programName = "elm-openapi-gen")
+    let parser = ArgumentParser.Create<Arguments>(
+        programName = "elm-openapi-gen",
+        helpTextMessage = "Generate type-safe Elm HTTP clients from OpenAPI specifications.\n\nSupport the project: https://github.com/sponsors/Yury-Zakharov"
+    )
 
     try
         let results = parser.Parse argv

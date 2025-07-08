@@ -373,8 +373,8 @@ module Codegen =
             |> Seq.map (fun kvp -> 
                 let field = toElmField kvp.Key kvp.Value
                 // Handle recursive fields by making them lazy
-                if isRecursive && field.Contains(name) then
-                    field.Replace( $" : %s{name}", $" : (() -> %s{name})")
+                if isRecursive && field.EndsWith($" : {name}") then
+                    field.Replace( $" : {name}", $" : (() -> {name})")
                 else field)
             |> String.concat "\n    , "
             

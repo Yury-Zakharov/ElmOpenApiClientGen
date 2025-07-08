@@ -2,7 +2,8 @@ module {{ moduleName }} exposing (..)
 
 {-| {{ apiDescription }}
 
-This module was generated from an OpenAPI specification.
+This module was generated from an OpenAPI specification by [ElmOpenApiClientGen](https://github.com/Yury-Zakharov/ElmOpenApiClientGen).
+💖 Support the project: https://github.com/sponsors/Yury-Zakharov
 {{ if generationTimestamp }}Generated on: {{ generationTimestamp }}{{ end }}
 
 # Types
