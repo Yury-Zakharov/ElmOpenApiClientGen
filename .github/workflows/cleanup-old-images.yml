@@ -1,0 +1,76 @@
+name: Cleanup Old Docker Images
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # Every Monday at 00:00 UTC
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Extract repo name
+        id: vars
+        run: |
+          echo "repo_lower=${{ github.repository }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_OUTPUT
+
+      - name: Fetch container versions
+        id: fetch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api -H "Accept: application/vnd.github+json" \
+            /user/packages/container/${{ steps.vars.outputs.repo_lower }}/versions \
+            > versions.json
+
+          jq -r '.[] | @base64' versions.json > versions_b64.txt
+
+      - name: Determine versions to delete
+        id: classify
+        run: |
+          mkdir keep delete
+          semver_tags=()
+          while read -r b64; do
+            version=$(echo "$b64" | base64 -d)
+            id=$(echo "$version" | jq -r '.id')
+            tags=$(echo "$version" | jq -r '.metadata.container.tags // [] | @sh' | tr -d \')
+
+            if [[ -z "$tags" ]]; then
+              echo "$id" >> delete/untagged.txt
+              continue
+            fi
+
+            for tag in $tags; do
+              if [[ "$tag" == v* ]]; then
+                semver_tags+=("$tag|$id")
+              elif [[ "$tag" == sha-* ]]; then
+                echo "$id" >> delete/sha.txt
+              fi
+            done
+          done < versions_b64.txt
+
+          # Keep the 2 most recent semantic versions
+          printf "%s\n" "${semver_tags[@]}" | sort -Vr | {
+            head -n 2 | cut -d'|' -f2 > keep/semver.txt
+            tail -n +3 | cut -d'|' -f2 >> delete/semver.txt
+          }
+
+          echo "Versions to delete:"
+          find delete -type f -exec cat {} +
+
+      - name: Delete all marked versions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for file in delete/*.txt; do
+            while read -r version_id; do
+              echo "Deleting version id: $version_id"
+              gh api --method DELETE \
+                /user/packages/container/${{ steps.vars.outputs.repo_lower }}/versions/$version_id
+            done < "$file"
+          done
