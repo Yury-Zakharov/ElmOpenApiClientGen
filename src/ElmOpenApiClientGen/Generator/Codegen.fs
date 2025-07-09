@@ -1663,7 +1663,7 @@ module Codegen =
         
         allModules |> List.ofSeq
         
-    let generateModules (doc: OpenApiDocument) (prefix: string option) (languageTarget: ILanguageTarget) : ElmModule list =
+    let generateModules (doc: OpenApiDocument) (prefix: string option) (languageTarget: ILanguageTarget) (customTemplate: string option) : ElmModule list =
         let baseModuleName = defaultArg prefix languageTarget.DefaultModulePrefix
         
         // For now, use the new language target interface for simple generation
@@ -1675,6 +1675,7 @@ module Codegen =
             Force = false
             ApiDescription = if doc.Info <> null then doc.Info.Title else "Generated API"
             GenerationTimestamp = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            CustomTemplatePath = customTemplate
         }
         
         let moduleCode = languageTarget.GenerateModule context

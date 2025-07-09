@@ -13,9 +13,9 @@
         <Content Include="Generator\Templates\module.scriban">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Include="Languages\Elm\Templates\module.scriban">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
+        <EmbeddedResource Include="Languages\Elm\Templates\module.scriban">
+            <LogicalName>ElmOpenApiClientGen.Languages.Elm.Templates.module.scriban</LogicalName>
+        </EmbeddedResource>
         
         <Compile Include="Generator\ElmModule.fs" />
         <Compile Include="Generator\TemplateRenderer.fs" />
@@ -23,6 +23,7 @@
         <Compile Include="Generator\Parser.fs" />
         
         <Compile Include="Languages\ILanguageTarget.fs" />
+        <Compile Include="Languages\TemplateResolver.fs" />
         <Compile Include="Languages\Elm\ElmLanguageTarget.fs" />
         <Compile Include="Languages\GeneratorFactory.fs" />
         

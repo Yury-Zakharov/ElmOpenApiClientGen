@@ -56,6 +56,7 @@ let ``ElmLanguageTarget should generate module with correct structure`` () =
         Force = false
         ApiDescription = "Test API"
         GenerationTimestamp = "2023-01-01 00:00:00"
+        CustomTemplatePath = None
     }
     
     let moduleCode = target.GenerateModule context
