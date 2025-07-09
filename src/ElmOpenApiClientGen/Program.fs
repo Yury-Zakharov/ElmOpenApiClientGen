@@ -3,12 +3,13 @@ open Argu
 
 open ElmOpenApiClientGen
 open ElmOpenApiClientGen.Generator
+open ElmOpenApiClientGen.Languages
 
 [<EntryPoint>]
 let main argv =
     let parser = ArgumentParser.Create<Arguments>(
-        programName = "elm-openapi-gen",
-        helpTextMessage = "Generate type-safe Elm HTTP clients from OpenAPI specifications.\n\nSupport the project: https://github.com/sponsors/Yury-Zakharov"
+        programName = "openapi-client-gen",
+        helpTextMessage = "Generate type-safe HTTP clients from OpenAPI specifications.\n\nSupport the project: https://github.com/sponsors/Yury-Zakharov"
     )
 
     try
@@ -17,19 +18,31 @@ let main argv =
         let inputPath = results.GetResult <@ Input @>
         let outputDir = results.GetResult <@ Output @>
         let modulePrefix = results.TryGetResult <@ ModulePrefix @>
+        let targetStr = results.TryGetResult <@ Target @> |> Option.defaultValue "elm"
         let force = results.Contains <@ Force @>
+
+        // Parse target language
+        let targetLanguage = 
+            match GeneratorFactory.parseLanguageTarget targetStr with
+            | Ok target -> target
+            | Error msg -> 
+                printfn $"Error: %s{msg}"
+                exit 1
 
         // Step 1: Load and parse OpenAPI spec
         let openApiDoc =
             Parser.loadSpec inputPath
             // Parser.loadSpec : string -> OpenApiDocument
 
-        // Step 2: Convert OpenAPI spec into Elm modules
-        let elmModules =
-            Codegen.generateModules openApiDoc modulePrefix
-            // Codegen.generateModules : OpenApiDocument -> string option -> ElmModule list
+        // Step 2: Create language target
+        let languageTarget = GeneratorFactory.createLanguageTarget targetLanguage
 
-        // Step 3: Write generated Elm modules to output directory
+        // Step 3: Convert OpenAPI spec into modules using the target language
+        let elmModules =
+            Codegen.generateModules openApiDoc modulePrefix languageTarget
+            // Codegen.generateModules : OpenApiDocument -> string option -> ILanguageTarget -> ElmModule list
+
+        // Step 4: Write generated modules to output directory
         Output.writeModules outputDir elmModules force
         // Output.writeModules : string -> ElmModule list -> bool -> unit
 

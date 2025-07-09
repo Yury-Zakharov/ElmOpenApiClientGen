@@ -13,6 +13,7 @@
     <Compile Include="CodegenNegativeTests.fs" />
     <Compile Include="TemplateRendererTests.fs" />
     <Compile Include="TemplateRendererNegativeTests.fs" />
+    <Compile Include="LanguageTargetTests.fs" />
     <Compile Include="IntegrationTests.fs" />
     <Compile Include="IntegrationNegativeTests.fs" />
     <Compile Include="Program.fs" />

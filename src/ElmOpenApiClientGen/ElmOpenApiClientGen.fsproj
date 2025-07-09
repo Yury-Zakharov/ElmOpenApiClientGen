@@ -13,13 +13,20 @@
         <Content Include="Generator\Templates\module.scriban">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        <Content Include="Languages\Elm\Templates\module.scriban">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
         
         <Compile Include="Generator\ElmModule.fs" />
         <Compile Include="Generator\TemplateRenderer.fs" />
         <Compile Include="Generator\RequestGenerator.fs" />
-        <Compile Include="Generator\Codegen.fs" />
         <Compile Include="Generator\Parser.fs" />
         
+        <Compile Include="Languages\ILanguageTarget.fs" />
+        <Compile Include="Languages\Elm\ElmLanguageTarget.fs" />
+        <Compile Include="Languages\GeneratorFactory.fs" />
+        
+        <Compile Include="Generator\Codegen.fs" />
         <Compile Include="Generator\Output.fs" />
         <Compile Include="Arguments.fs" />
         <Compile Include="Program.fs"/>

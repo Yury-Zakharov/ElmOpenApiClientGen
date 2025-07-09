@@ -4,6 +4,7 @@ open System.Collections.Generic
 open Microsoft.OpenApi.Any
 open Microsoft.OpenApi.Models
 open ElmOpenApiClientGen.Generator
+open ElmOpenApiClientGen.Languages
 
 module Codegen =
 
@@ -1662,23 +1663,28 @@ module Codegen =
         
         allModules |> List.ofSeq
         
-    let generateModules (doc: OpenApiDocument) (prefix: string option) : ElmModule list =
-        let baseModuleName = defaultArg prefix "Api"
+    let generateModules (doc: OpenApiDocument) (prefix: string option) (languageTarget: ILanguageTarget) : ElmModule list =
+        let baseModuleName = defaultArg prefix languageTarget.DefaultModulePrefix
         
-        // Perform type usage analysis for optimization
-        let usedTypes, typeDependencies = analyzeTypeUsage doc
+        // For now, use the new language target interface for simple generation
+        // TODO: In Phase 2, we can add language-specific optimizations
+        let context = {
+            LanguageContext.Document = doc
+            ModulePrefix = prefix
+            OutputPath = ""
+            Force = false
+            ApiDescription = if doc.Info <> null then doc.Info.Title else "Generated API"
+            GenerationTimestamp = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        }
         
-        // Check if we should split modules for performance
-        let usedSchemas = 
-            if doc.Components <> null && doc.Components.Schemas <> null then
-                doc.Components.Schemas |> Seq.filter (fun kvp -> usedTypes.Contains(kvp.Key))
-            else Seq.empty
-            
-        let shouldSplit = shouldSplitModules usedSchemas
-
-        if shouldSplit then
-            // Generate multiple modules for better performance
-            generateSplitModules doc baseModuleName usedTypes typeDependencies
-        else
-            // Generate single optimized module
-            generateSingleModule doc baseModuleName usedTypes
+        let moduleCode = languageTarget.GenerateModule context
+        let outputPath = languageTarget.GetOutputPath "" prefix
+        
+        // Create ElmModule for backward compatibility
+        let elmModule = {
+            ElmModule.QualifiedName = $"{baseModuleName}.Schemas"
+            RelativePath = outputPath
+            Source = moduleCode
+        }
+        
+        [elmModule]
