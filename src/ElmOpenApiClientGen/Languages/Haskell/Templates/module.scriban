@@ -1,0 +1,44 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
+
+module {{moduleName}} where
+
+import GHC.Generics
+import Data.Aeson
+import Data.Text (Text)
+import Network.HTTP.Simple
+import Network.HTTP.Types.Status (statusCode)
+
+-- | {{apiDescription}}
+-- 
+-- This module was generated from an OpenAPI specification by ElmOpenApiClientGen.
+-- 💖 Support the project: https://github.com/sponsors/Yury-Zakharov
+-- Generated on: {{generationTimestamp}}
+
+-- Configuration
+data Config = Config
+    { configBaseUrl :: Text
+    , configApiKey :: Text
+    , configBearerToken :: Text
+    , configBasicAuth :: Text
+    , configCustomHeaders :: [(Text, Text)]
+    , configTimeout :: Maybe Int
+    } deriving (Show, Generic)
+
+instance ToJSON Config
+instance FromJSON Config
+
+-- Types
+{{types}}
+
+-- JSON instances
+{{jsonInstances}}
+
+-- HTTP client functions
+{{httpFunctions}}
+
+-- Utility functions
+makeRequest :: Config -> Request -> IO (Response ByteString)
+makeRequest config req = httpBS $ setRequestHeaders headers req
+  where
+    headers = [("User-Agent", "ElmOpenApiClientGen/1.0.0")] ++ map (\(k,v) -> (encodeUtf8 k, encodeUtf8 v)) (configCustomHeaders config)

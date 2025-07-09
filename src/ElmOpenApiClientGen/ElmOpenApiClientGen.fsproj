@@ -16,6 +16,9 @@
         <EmbeddedResource Include="Languages\Elm\Templates\module.scriban">
             <LogicalName>ElmOpenApiClientGen.Languages.Elm.Templates.module.scriban</LogicalName>
         </EmbeddedResource>
+        <EmbeddedResource Include="Languages\Haskell\Templates\module.scriban">
+            <LogicalName>ElmOpenApiClientGen.Languages.Haskell.Templates.module.scriban</LogicalName>
+        </EmbeddedResource>
         
         <Compile Include="Generator\ElmModule.fs" />
         <Compile Include="Generator\TemplateRenderer.fs" />
@@ -25,6 +28,7 @@
         <Compile Include="Languages\ILanguageTarget.fs" />
         <Compile Include="Languages\TemplateResolver.fs" />
         <Compile Include="Languages\Elm\ElmLanguageTarget.fs" />
+        <Compile Include="Languages\Haskell\HaskellLanguageTarget.fs" />
         <Compile Include="Languages\GeneratorFactory.fs" />
         
         <Compile Include="Generator\Codegen.fs" />
