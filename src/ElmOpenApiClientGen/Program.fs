@@ -19,6 +19,7 @@ let main argv =
         let outputDir = results.GetResult <@ Output @>
         let modulePrefix = results.TryGetResult <@ ModulePrefix @>
         let targetStr = results.TryGetResult <@ Target @> |> Option.defaultValue "elm"
+        let customTemplate = results.TryGetResult <@ Template @>
         let force = results.Contains <@ Force @>
 
         // Parse target language
@@ -39,8 +40,8 @@ let main argv =
 
         // Step 3: Convert OpenAPI spec into modules using the target language
         let elmModules =
-            Codegen.generateModules openApiDoc modulePrefix languageTarget
-            // Codegen.generateModules : OpenApiDocument -> string option -> ILanguageTarget -> ElmModule list
+            Codegen.generateModules openApiDoc modulePrefix languageTarget customTemplate
+            // Codegen.generateModules : OpenApiDocument -> string option -> ILanguageTarget -> string option -> ElmModule list
 
         // Step 4: Write generated modules to output directory
         Output.writeModules outputDir elmModules force

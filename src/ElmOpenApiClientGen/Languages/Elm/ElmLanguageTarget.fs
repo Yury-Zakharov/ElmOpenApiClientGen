@@ -23,50 +23,25 @@ type ElmLanguageTarget() =
             // For Phase 1, return placeholder error types
             ["-- Error types will be generated here"]
             
-        member _.GenerateModule(context: LanguageContext) =
-            // For Phase 1, use the existing Codegen.generateModules function
-            // We'll refactor this properly in Phase 2
-            let doc = context.Document
-            let prefix = context.ModulePrefix
+        member this.GenerateModule(context: LanguageContext) =
+            // Get template content (either custom or embedded default)
+            let templateContent = TemplateResolver.resolveTemplate context (this :> ILanguageTarget)
             
-            // Create a minimal template context to generate basic module
+            // Create simple template variables for rendering
             let moduleName = 
-                match prefix with
-                | Some p -> $"{p}.Schemas"
+                match context.ModulePrefix with
+                | Some prefix -> $"{prefix}.Schemas"
                 | None -> "Api.Schemas"
             
-            // Generate a basic module structure
-            $"""module {moduleName} exposing (..)
-
-{{-| {context.ApiDescription}
-
-Generated on: {context.GenerationTimestamp}
-
-This module was generated from an OpenAPI specification by [ElmOpenApiClientGen](https://github.com/Yury-Zakharov/ElmOpenApiClientGen).
-💖 Support the project: https://github.com/sponsors/Yury-Zakharov
-
--}}
-
-import Dict exposing (Dict)
-import Http
-import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Extra exposing (andMap)
-import Json.Encode as Encode exposing (Value)
-import Task exposing (Task)
-import Url.Builder as Url
-
--- Basic configuration type
-type alias Config =
-    {{ baseUrl : String
-    , apiKey : String
-    , bearerToken : String
-    , basicAuth : String
-    , customHeaders : List (String, String)
-    , timeout : Maybe Float
-    }}
-
--- TODO: Add actual types and requests from the OpenAPI spec
-"""
+            // For now, do simple string replacements in the template
+            templateContent
+                .Replace("{{moduleName}}", moduleName)
+                .Replace("{{apiDescription}}", context.ApiDescription)
+                .Replace("{{generationTimestamp}}", context.GenerationTimestamp)
+                .Replace("{{types}}", "-- Types will be generated here")
+                .Replace("{{decoders}}", "-- Decoders will be generated here")
+                .Replace("{{encoders}}", "-- Encoders will be generated here")
+                .Replace("{{requests}}", "-- Requests will be generated here")
             
         member _.ValidateOutput(output: string) =
             // Basic validation - check if the output contains basic Elm module structure
@@ -78,3 +53,6 @@ type alias Config =
         member _.GetOutputPath(basePath: string) (modulePrefix: string option) =
             let prefix = modulePrefix |> Option.defaultValue "Api"
             Path.Combine(basePath, prefix, "Schemas.elm")
+            
+        member _.GetDefaultTemplate() =
+            TemplateResolver.loadEmbeddedTemplate "ElmOpenApiClientGen.Languages.Elm.Templates.module.scriban"

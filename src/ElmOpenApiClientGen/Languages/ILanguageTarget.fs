@@ -15,6 +15,7 @@ type LanguageContext = {
     Force: bool
     ApiDescription: string
     GenerationTimestamp: string
+    CustomTemplatePath: string option
 }
 
 /// Interface for language-specific code generation implementations
@@ -45,3 +46,6 @@ type ILanguageTarget =
     
     /// Get the output file path for a module
     abstract member GetOutputPath: string -> string option -> string
+    
+    /// Get the default embedded template content for this language
+    abstract member GetDefaultTemplate: unit -> string

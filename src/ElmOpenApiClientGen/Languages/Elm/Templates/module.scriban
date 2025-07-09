@@ -1,55 +1,47 @@
-module {{ moduleName }} exposing (..)
+module {{moduleName}} exposing (..)
 
-{-| {{ apiDescription }}
+{-| {{apiDescription}}
 
 This module was generated from an OpenAPI specification by [ElmOpenApiClientGen](https://github.com/Yury-Zakharov/ElmOpenApiClientGen).
 💖 Support the project: https://github.com/sponsors/Yury-Zakharov
-{{ if generationTimestamp }}Generated on: {{ generationTimestamp }}{{ end }}
+Generated on: {{generationTimestamp}}
 
 # Types
-{{ for typeDoc in typeDocumentation ~}}
-@docs {{ typeDoc }}
-{{ end ~}}
 
 # Functions  
-{{ for funcDoc in functionDocumentation ~}}
-@docs {{ funcDoc }}
-{{ end ~}}
 
 -}
 
-{{ if needsDict }}import Dict exposing (Dict){{ end }}
-{{ if needsHttp }}import Http{{ end }}
-{{ if needsJsonDecode }}import Json.Decode as Decode exposing (Decoder){{ end }}
-{{ if needsAndMap }}import Json.Decode.Extra exposing (andMap){{ end }}
-{{ if needsJsonEncode }}import Json.Encode as Encode exposing (Value){{ end }}
-{{ if needsTask }}import Task exposing (Task){{ end }}
-{{ if needsUrl }}import Url.Builder as Url{{ end }}
+import Dict exposing (Dict)
+import Http
+import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Extra exposing (andMap)
+import Json.Encode as Encode exposing (Value)
+import Task exposing (Task)
+import Url.Builder as Url
 
 -- Types:
 
-{{ for t in types ~}}
-{{ t }}
-
-{{ end ~}}
+{{types}}
 
 -- Decoders:
 
-{{ for d in decoders ~}}
-{{ d }}
-
-{{ end ~}}
+{{decoders}}
 
 -- Encoders:
 
-{{ for e in encoders ~}}
-{{ e }}
-
-{{ end ~}}
+{{encoders}}
 
 -- Requests:
-{{ for req in requests ~}}
-{{ req }}
 
-{{ end ~}}
+{{requests}}
 
+-- Basic configuration type
+type alias Config =
+    { baseUrl : String
+    , apiKey : String
+    , bearerToken : String
+    , basicAuth : String
+    , customHeaders : List (String, String)
+    , timeout : Maybe Float
+    }
