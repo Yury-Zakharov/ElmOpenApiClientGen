@@ -30,6 +30,31 @@ let ``GeneratorFactory should return error for invalid target`` () =
     | Error msg -> Assert.Contains("Unsupported target language", msg)
 
 [<Fact>]
+let ``GeneratorFactory should create CSharp language target`` () =
+    let target = GeneratorFactory.createLanguageTarget LanguageTarget.CSharp
+    
+    Assert.Equal("C#", target.Name)
+    Assert.Equal("cs", target.FileExtension)
+    Assert.Equal("GeneratedApi", target.DefaultModulePrefix)
+
+[<Fact>]
+let ``GeneratorFactory should parse csharp target correctly`` () =
+    let result = GeneratorFactory.parseLanguageTarget "csharp"
+    
+    match result with
+    | Ok target -> Assert.Equal(LanguageTarget.CSharp, target)
+    | Error msg -> Assert.True(false, $"Expected Ok but got Error: {msg}")
+
+[<Fact>]
+let ``GeneratorFactory should include all targets in available targets`` () =
+    let targets = GeneratorFactory.getAvailableTargets()
+    
+    Assert.NotEmpty(targets)
+    Assert.Contains(LanguageTarget.Elm, targets)
+    Assert.Contains(LanguageTarget.Haskell, targets)
+    Assert.Contains(LanguageTarget.CSharp, targets)
+
+[<Fact>]
 let ``GeneratorFactory should return elm as default target`` () =
     let target = GeneratorFactory.getDefaultTarget()
     
