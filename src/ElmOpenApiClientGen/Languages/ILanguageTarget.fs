@@ -7,6 +7,7 @@ open Microsoft.OpenApi.Models
 type LanguageTarget = 
     | Elm
     | Haskell
+    | CSharp
 
 /// Context information passed to language-specific generators
 type LanguageContext = {

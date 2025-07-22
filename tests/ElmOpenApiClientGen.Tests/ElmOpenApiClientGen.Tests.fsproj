@@ -15,9 +15,12 @@
     <Compile Include="TemplateRendererNegativeTests.fs" />
     <Compile Include="LanguageTargetTests.fs" />
     <Compile Include="HaskellLanguageTargetTests.fs" />
+    <Compile Include="CSharpLanguageTargetTests.fs" />
+    <Compile Include="CSharpLanguageTargetNegativeTests.fs" />
     <Compile Include="TemplateResolverTests.fs" />
     <Compile Include="IntegrationTests.fs" />
     <Compile Include="IntegrationNegativeTests.fs" />
+    <Compile Include="CSharpIntegrationTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
