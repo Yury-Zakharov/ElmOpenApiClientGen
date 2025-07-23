@@ -1,25 +1,26 @@
-# Elm OpenAPI Client Generator
+# Multi-Language OpenAPI Client Generator
 
 [![Build Status](https://github.com/Yury-Zakharov/ElmOpenApiClientGen/workflows/CI/badge.svg)](https://github.com/Yury-Zakharov/ElmOpenApiClientGen/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![F# Version](https://img.shields.io/badge/F%23-10.0-blue.svg)](https://fsharp.org/)
-[![Elm Version](https://img.shields.io/badge/Elm-0.19.1-blue.svg)](https://elm-lang.org/)
+[![Languages](https://img.shields.io/badge/Targets-Elm%20%7C%20C%23%20%7C%20Haskell-green.svg)](#)
+[![Tests](https://img.shields.io/badge/Tests-171%20Passing-brightgreen.svg)](#)
 
 ## 💖 Support This Project
 
-If you find ElmOpenApiClientGen useful, please consider supporting it through [GitHub Sponsors](https://github.com/sponsors/Yury-Zakharov).  
+If you find this Multi-Language OpenAPI Client Generator useful, please consider supporting it through [GitHub Sponsors](https://github.com/sponsors/Yury-Zakharov).  
 Your sponsorship helps cover development time, maintenance, and new feature work.
 
 [Become a sponsor](https://github.com/sponsors/Yury-Zakharov)
 
-A robust, production-ready code generator that transforms OpenAPI 3.0/3.1 specifications into type-safe Elm HTTP clients. Built with F# and designed for reliability, this tool handles real-world API specifications gracefully while generating clean, idiomatic Elm code.
+A robust, production-ready multi-language code generator that transforms OpenAPI 3.0/3.1 specifications into type-safe HTTP clients. Built with F# and designed for reliability, this tool handles real-world API specifications gracefully while generating clean, idiomatic code for **Elm**, **Haskell**, and **C#**.
 
 ## ✨ Key Features
 
 ### 🛡️ **Production-Ready Reliability**
 - **Never crashes on invalid input** - Graceful error handling with human-readable diagnostic comments
 - **Comprehensive defensive programming** - Handles malformed OpenAPI specs, null values, and edge cases
-- **Extensive test coverage** - 102 tests covering positive cases, negative cases, and integration scenarios
+- **Extensive test coverage** - 171 tests covering positive cases, negative cases, and integration scenarios
 
 ### 🎯 **Complete OpenAPI Support**
 - **OpenAPI 3.0 & 3.1** - Full specification support including JSON Schema draft 2020-12
@@ -45,7 +46,10 @@ A robust, production-ready code generator that transforms OpenAPI 3.0/3.1 specif
 ### Prerequisites
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or later
-- [Elm 0.19.1](https://guide.elm-lang.org/install/elm.html) or later
+- **Target Language Runtime** (for the language you're generating):
+  - [Elm 0.19.1](https://guide.elm-lang.org/install/elm.html) or later for Elm clients
+  - [GHC 9.0+](https://www.haskell.org/ghc/) for Haskell clients  
+  - [.NET 10.0+](https://dotnet.microsoft.com/download/dotnet/10.0) for C# clients
 
 ### Installation
 
@@ -68,14 +72,24 @@ dotnet test
 dotnet run --project src/ElmOpenApiClientGen \
   --input api-spec.yaml \
   --output ./src/Generated \
+  --target elm \
   --moduleprefix Api \
   --force
 
-# Generate Elm client from remote OpenAPI URL
+# Generate C# client from remote OpenAPI URL
 dotnet run --project src/ElmOpenApiClientGen \
   --input https://api.example.com/openapi.yaml \
   --output ./src/Generated \
-  --moduleprefix Api \
+  --target csharp \
+  --moduleprefix MyApi \
+  --force
+
+# Generate Haskell client
+dotnet run --project src/ElmOpenApiClientGen \
+  --input api-spec.yaml \
+  --output ./src/Generated \
+  --target haskell \
+  --moduleprefix MyApi \
   --force
 ```
 
@@ -111,11 +125,25 @@ docker-compose -f docker-compose.production.yml run --rm generate-petstore
 - Troubleshooting and debugging
 - Security considerations
 
-This generates:
+This generates language-specific HTTP clients:
+
+**Elm Output:**
 - **Type definitions** in `Generated/Api/Schemas.elm`
 - **HTTP client functions** with full type safety
 - **JSON encoders/decoders** for all data types
 - **Error types** for structured error handling
+
+**C# Output:**
+- **ApiClient class** with async HTTP methods
+- **Record types** for data models  
+- **Result<T,E> pattern** for error handling
+- **Nullable reference types** for optional fields
+
+**Haskell Output:**
+- **Data types** with automatic JSON instances
+- **HTTP client functions** using Servant or similar
+- **Type-safe error handling** with Either types
+- **Lens support** for data access
 
 ## 🌐 URL Input Support
 
@@ -124,15 +152,15 @@ This generates:
 ### Remote OpenAPI Specifications
 
 ```bash
-# Popular API examples
+# Popular API examples (defaults to Elm)
 dotnet run --input https://petstore.swagger.io/v2/swagger.json --output ./petstore
-dotnet run --input https://api.apis.guru/v2/specs/github.com/1.1.4/openapi.yaml --output ./github
+dotnet run --input https://api.apis.guru/v2/specs/github.com/1.1.4/openapi.yaml --output ./github --target csharp
 
-# Corporate APIs  
-dotnet run --input https://api.company.com/v1/openapi.yaml --output ./company-api
+# Corporate APIs with different targets
+dotnet run --input https://api.company.com/v1/openapi.yaml --output ./company-api --target haskell
 
 # Development servers
-dotnet run --input http://localhost:8080/openapi.json --output ./local-api
+dotnet run --input http://localhost:8080/openapi.json --output ./local-api --target elm
 ```
 
 ### Features
@@ -158,7 +186,8 @@ dotnet run --project src/ElmOpenApiClientGen [OPTIONS]
 
 Options:
   --input <path>          Path to OpenAPI spec file (JSON or YAML) or URL to download spec
-  --output <directory>    Output directory for generated Elm files
+  --output <directory>    Output directory for generated files
+  --target <language>     Target language: elm (default), csharp, haskell
   --moduleprefix <name>   Module name prefix (default: Api)
   --force                 Overwrite existing files
 ```
@@ -301,6 +330,161 @@ update msg model =
             ( { model | error = Just \"Unauthorized\" }, Cmd.none )
 ```
 
+## 🌍 Multi-Language Support
+
+### C# Generated Code
+
+```csharp
+// Generated/MyApiClient.cs
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace MyApi
+{
+    /// <summary>
+    /// User data from the API
+    /// </summary>
+    public record User(
+        public int Id { get; init; }
+        public string Name { get; init; }
+        public string? Email { get; init; }
+        public DateTime CreatedAt { get; init; }
+    );
+
+    /// <summary>
+    /// Generated API client for MyApi
+    /// </summary>
+    public class MyApiClient
+    {
+        private readonly HttpClient _httpClient;
+        private readonly string _baseUrl;
+
+        public MyApiClient(HttpClient httpClient, string baseUrl)
+        {
+            _httpClient = httpClient;
+            _baseUrl = baseUrl;
+        }
+
+        /// <summary>
+        /// Get user by ID
+        /// </summary>
+        public async Task<Result<User, ApiError>> GetUserAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/users/{userId}");
+                return await ExecuteAsync<User>(request, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                return Result<User, ApiError>.Failure(new ApiError($"Failed to execute GetUser: {ex.Message}"));
+            }
+        }
+    }
+}
+```
+
+### Haskell Generated Code
+
+```haskell
+-- Generated/MyApi/Client.hs
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE TypeOperators #-}
+
+module MyApi.Client where
+
+import Data.Aeson
+import Data.Time
+import GHC.Generics
+import Network.HTTP.Client (Manager)
+import Servant.API
+import Servant.Client
+
+-- | User data from the API
+data User = User
+  { userId :: Int
+  , userName :: String
+  , userEmail :: Maybe String
+  , userCreatedAt :: UTCTime
+  } deriving (Show, Eq, Generic)
+
+instance FromJSON User where
+  parseJSON = withObject "User" $ \o -> User
+    <$> o .: "id"
+    <*> o .: "name"
+    <*> o .:? "email"
+    <*> o .: "created_at"
+
+instance ToJSON User where
+  toJSON User{..} = object
+    [ "id" .= userId
+    , "name" .= userName
+    , "email" .= userEmail
+    , "created_at" .= userCreatedAt
+    ]
+
+-- | API definition
+type MyApiAPI = "users" :> Capture "id" Int :> Get '[JSON] User
+
+-- | Generated client functions
+getUserById :: Int -> ClientM User
+getUserById = client (Proxy :: Proxy MyApiAPI)
+
+-- | Run client with configuration
+runMyApiClient :: Manager -> BaseUrl -> ClientM a -> IO (Either ClientError a)
+runMyApiClient manager baseUrl = runClientM
+```
+
+### Usage Examples by Language
+
+**C# Usage:**
+```csharp
+// Program.cs
+var httpClient = new HttpClient();
+var client = new MyApiClient(httpClient, "https://api.example.com");
+
+try 
+{
+    var result = await client.GetUserAsync(123);
+    switch (result)
+    {
+        case Result<User, ApiError>.Success success:
+            Console.WriteLine($"User: {success.Value.Name}");
+            break;
+        case Result<User, ApiError>.Failure failure:
+            Console.WriteLine($"Error: {failure.Error.Message}");
+            break;
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Request failed: {ex.Message}");
+}
+```
+
+**Haskell Usage:**
+```haskell
+-- Main.hs
+import MyApi.Client
+import Network.HTTP.Client (newManager, defaultManagerSettings)
+import Servant.Client
+
+main :: IO ()
+main = do
+  manager <- newManager defaultManagerSettings
+  let baseUrl = BaseUrl Https "api.example.com" 443 ""
+  
+  result <- runMyApiClient manager baseUrl (getUserById 123)
+  case result of
+    Right user -> putStrLn $ "User: " ++ userName user
+    Left err -> putStrLn $ "Error: " ++ show err
+```
+
 ## 🧪 Testing
 
 The project includes comprehensive test coverage:
@@ -327,11 +511,12 @@ cd integration-tests
 
 ### Test Categories
 
-- **Unit Tests** (102 tests) - Individual component testing with comprehensive coverage
-- **Integration Tests** (Host-based) - End-to-end pipeline testing with file and URL inputs
+- **Unit Tests** (171 tests) - Individual component testing with comprehensive coverage for all language targets
+- **Integration Tests** (Host-based) - End-to-end pipeline testing with file and URL inputs for Elm, C#, and Haskell
 - **Containerized Integration Tests** - Complete workflow validation in isolated containers
-- **Negative Tests** - Error handling, network failures, and edge cases
+- **Negative Tests** - Error handling, network failures, and edge cases across all languages
 - **URL Input Tests** - HTTP download validation for both YAML and JSON endpoints
+- **Language-Specific Tests** - Target-specific code generation, validation, and defensive programming
 
 ### Integration Test Features
 
@@ -360,6 +545,12 @@ src/ElmOpenApiClientGen/
 │   ├── RequestGenerator.fs    # HTTP client generation
 │   ├── Codegen.fs            # Main code generation logic
 │   └── TemplateRenderer.fs   # Template processing
+├── Languages/                # Multi-language support
+│   ├── ILanguageTarget.fs    # Common interface for all targets
+│   ├── Elm/                  # Elm language target
+│   ├── Haskell/              # Haskell language target
+│   ├── CSharp/               # C# language target
+│   └── GeneratorFactory.fs   # Language target factory
 ├── Models/                   # Data models and types
 ├── Utils/                    # Utility functions
 └── Program.fs               # CLI entry point
@@ -370,10 +561,11 @@ src/ElmOpenApiClientGen/
 1. **Input** - Accept local file or download from URL (YAML/JSON)
 2. **Parse** OpenAPI specification with automatic format detection
 3. **Validate** schema and resolve references
-4. **Generate** Elm type definitions from schemas
-5. **Create** HTTP client functions for endpoints
-6. **Render** using Scriban templates
-7. **Output** clean, type-safe Elm code
+4. **Target Selection** - Choose language target (Elm, C#, or Haskell)
+5. **Generate** type definitions from schemas using language-specific mapping
+6. **Create** HTTP client functions for endpoints with appropriate patterns
+7. **Render** using Scriban templates customized for each language
+8. **Output** clean, type-safe, idiomatic code in the target language
 
 ## 🔧 Advanced Features
 
@@ -539,21 +731,25 @@ dotnet build
 ### Running Examples
 
 ```bash
-# Generate client from local files
+# Generate Elm client from local files
 dotnet run --project src/ElmOpenApiClientGen \
   --input sample/openapi.yaml \
   --output examples/generated \
+  --target elm \
   --moduleprefix PetStore
 
-# Generate client from remote URLs  
+# Generate C# client from remote URLs  
 dotnet run --project src/ElmOpenApiClientGen \
   --input https://petstore.swagger.io/v2/swagger.json \
   --output examples/petstore-client \
+  --target csharp \
   --moduleprefix PetStore
 
+# Generate Haskell client from GitHub API
 dotnet run --project src/ElmOpenApiClientGen \
   --input https://api.github.com/openapi.json \
   --output examples/github-client \
+  --target haskell \
   --moduleprefix GitHub
 ```
 
@@ -561,17 +757,25 @@ dotnet run --project src/ElmOpenApiClientGen \
 
 ### Upcoming Features
 
+**Language Targets:**
+- [ ] **TypeScript** - Modern TypeScript with fetch API and async/await
+- [ ] **Rust** - Type-safe HTTP clients with reqwest and serde
+- [ ] **Go** - Idiomatic Go clients with net/http
+- [ ] **Python** - Modern Python with type hints and aiohttp
+- [ ] **Java** - Spring WebClient and Jackson integration
+
+**Core Features:**
 - [ ] **Authentication support for URLs** - API keys and credentials for private OpenAPI specs
 - [ ] **OpenAPI 3.2** support with new JSON Schema features
 - [ ] **GraphQL** integration for hybrid APIs  
 - [ ] **Real-time** WebSocket client generation
 - [ ] **Mock server** generation for testing
-- [ ] **TypeScript** output target
 - [ ] **Performance benchmarks** and optimization
 - [ ] **Plugin system** for custom generators
 
 ### Version History
 
+- **v3.0.0** - **Multi-language support** with C# and Haskell code generation alongside Elm
 - **v2.1.0** - URL input support for remote OpenAPI specifications
 - **v2.0.0** - Production-ready with defensive programming and comprehensive testing
 - **v1.5.0** - OpenAPI 3.1 support and advanced features
